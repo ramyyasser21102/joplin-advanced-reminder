@@ -1,0 +1,16 @@
+{
+	"manifest_version": 1,
+	"id": "com.advancedreminder.joplin",
+	"app_min_version": "3.7",
+	"version": "1.0.0",
+	"name": "Advanced Reminder",
+	"description": "Adds multiple reminder times to Joplin To-Do notes.",
+	"author": "ramyyasser21102",
+	"homepage_url": "https://github.com/ramyyasser21102/joplin-advanced-reminder",
+	"repository_url": "https://github.com/ramyyasser21102/joplin-advanced-reminder",
+	"keywords": [],
+	"categories": [],
+	"screenshots": [],
+	"icons": {},
+	"promo_tile": {}
+}
