@@ -1,11 +1,11 @@
 import joplin from 'api';
-import { loadReminders, saveReminders } from '../reminder/reminderStore';
+import { importTodoDueReminder, saveReminders } from '../reminder/reminderStore';
 import { reconcileNoteReminders } from '../reminder/reminderReconciler';
 import { buildReminderFormHtml } from './reminderFormHtml';
 import { parseReminderFormData } from './reminderFormParser';
 
 export const openReminderDialog = async (noteId: string): Promise<void> => {
-	const existingReminders = await loadReminders(noteId);
+	const existingReminders = await importTodoDueReminder(noteId);
 	const isDark = await joplin.shouldUseDarkColors();
 
 	const handle = await joplin.views.dialogs.create('advancedReminderDialog');
