@@ -11,7 +11,7 @@ runner) is already complete.
 | 03 | [Reminder Reconciliation](03-reminder-reconciliation.md) | Done |
 | 04 | [Date/Time Utilities](04-datetime-utilities.md) | Done |
 | 05 | [Reminder Dialog UI](05-reminder-dialog-ui.md) | Done |
-| 06 | [Plugin Wiring](06-plugin-wiring.md) | Not started |
+| 06 | [Plugin Wiring](06-plugin-wiring.md) | Done |
 | 07 | [Release Readiness](07-release-readiness.md) | Not started |
 
 Each feature file lists its scope, target files, and dependencies. Update the
