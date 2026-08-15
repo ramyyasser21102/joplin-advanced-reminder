@@ -16,10 +16,11 @@ describe('reminderFormHtml', () => {
 		expect(html).toContain('data-next-id="2"');
 	});
 
-	it('should render an empty list with data-next-id 0 when there are no reminders', () => {
+	it('should render one empty row when there are no reminders, rather than a blank form', () => {
 		const html = buildReminderFormHtml([], false);
-		expect(html).toContain('data-next-id="0"');
-		expect(html).not.toContain('reminder-0');
+		expect(html).toContain('name="reminder-0"');
+		expect(html).toContain('value=""');
+		expect(html).toContain('data-next-id="1"');
 	});
 
 	it('should apply the dark theme class when isDark is true', () => {

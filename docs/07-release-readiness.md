@@ -105,8 +105,62 @@ Joplin instead). Rebuilt and reverified: `.jpl`'s embedded manifest
 confirmed at `3.6`, all 39 tests still pass. This is deviation #6 alongside
 the five listed above.
 
+## Real-world testing finding: dialog reopen crash (critical, fixed)
+
+First hands-on test: clicking the toolbar bell opened a dialog with no
+fields (a to-do note with zero stored reminders — technically correct, but
+poor first-run UX) and a completely unstyled "Add Reminder" button. Closing
+it and clicking again did nothing at all, permanently.
+
+Root cause, confirmed against Joplin's actual source
+(`packages/lib/services/plugins/api/JoplinViewsDialogs.ts`,
+`Plugin.ts`, `WebviewController.ts`), not guessed:
+
+- `dialogs.create(id)` computes a **deterministic** handle
+  (`` `plugin-view-${pluginId}-${id}` ``) and calls
+  `Plugin.addViewController()`, which **throws** —
+  `"View already added or there is already a view with this ID"` — if a
+  controller with that handle already exists.
+- `openReminderDialog` was calling `create('advancedReminderDialog')` on
+  *every* invocation. First click: works. Second click: `create()` throws.
+  `registerCommands`'s `execute` had no try/catch around
+  `openReminderDialog`, so the rejection vanished with zero feedback —
+  exactly "stays in that state forever."
+- Also confirmed `addScript` does a Redux `PLUGIN_VIEW_PROP_PUSH` (append,
+  not replace) — so even without the crash, calling it on every open would
+  have silently duplicated `dialog.js`'s event listeners on the second and
+  later opens.
+
+**Fixes:**
+- `reminderDialog.ts`: the dialog handle is now created and configured
+  (`addScript`, `setButtons`) exactly once, cached in a module-level
+  variable, and reused across opens. Only `setHtml` (fresh reminder data)
+  and `open()` run per-invocation. Matches the pattern in Joplin's own demo
+  plugin, where `create()` is called once per dialog, not once per user
+  action.
+- `registerCommands.ts`: `openReminderDialog` is now wrapped in try/catch
+  with the same `console.error` + `showToast(ToastType.Error)` pattern used
+  by `reconcileNoteRemindersSafely` — a future unexpected failure here will
+  surface to the user instead of silently vanishing again.
+- `reminderFormHtml.ts`: a note with zero stored reminders now renders one
+  empty editable row by default, instead of a blank form with only an "Add
+  Reminder" button.
+- `dialog.css`: added real button styling (border, background, padding,
+  radius, hover state, dark-mode variants) and input styling — previously
+  only `#add-reminder { margin-top: 4px; }` existed, so buttons rendered as
+  bare unstyled native elements.
+
+**New regression test:** `tests/reminderDialog.test.ts` — asserts
+`dialogs.create` is called exactly once across two separate
+`openReminderDialog` calls, `setHtml` is called once per open, and the
+save/cancel flows behave correctly. This is the test that would have caught
+this bug before release.
+
+All 43 tests passing, `tsc --noEmit` clean, `.jpl` rebuilt and reverified.
+
 ## Deliverable
 
 `publish/com.advancedreminder.joplin.jpl` — install via Joplin's
 Options > Plugins > "Install from file". Verified working manifest
-(`app_min_version: 3.6`) confirmed inside the built archive.
+(`app_min_version: 3.6`) confirmed inside the built archive. Dialog
+reopen-crash fix included in this build.

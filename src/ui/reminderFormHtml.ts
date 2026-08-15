@@ -10,13 +10,16 @@ const buildReminderRowHtml = (fieldName: string, value: string): string => `
 `;
 
 export const buildReminderFormHtml = (reminders: Reminder[], isDark: boolean): string => {
-	const rows = reminders
-		.map((reminder, index) => buildReminderRowHtml(`${REMINDER_FIELD_PREFIX}${index}`, formatLocalDateTime(reminder.at)))
-		.join('');
+	const rowCount = Math.max(reminders.length, 1);
+	const rows = reminders.length === 0
+		? buildReminderRowHtml(`${REMINDER_FIELD_PREFIX}0`, '')
+		: reminders
+			.map((reminder, index) => buildReminderRowHtml(`${REMINDER_FIELD_PREFIX}${index}`, formatLocalDateTime(reminder.at)))
+			.join('');
 
 	return `
 		<form name="reminders" class="${isDark ? 'theme-dark' : 'theme-light'}">
-			<div id="reminder-list" data-next-id="${reminders.length}">${rows}</div>
+			<div id="reminder-list" data-next-id="${rowCount}">${rows}</div>
 			<button type="button" id="add-reminder">Add Reminder</button>
 		</form>
 	`;
