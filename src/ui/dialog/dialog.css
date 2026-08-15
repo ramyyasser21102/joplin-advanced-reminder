@@ -1,0 +1,24 @@
+.reminder-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.reminder-row input.empty {
+	border-color: #d32f2f;
+}
+
+#add-reminder {
+	margin-top: 4px;
+}
+
+.theme-dark {
+	color: #dcdcdc;
+	background-color: #1e1e1e;
+}
+
+.theme-light {
+	color: #222222;
+	background-color: #ffffff;
+}
