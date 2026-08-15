@@ -158,9 +158,57 @@ this bug before release.
 
 All 43 tests passing, `tsc --noEmit` clean, `.jpl` rebuilt and reverified.
 
+## Real-world testing finding: layout clipping and dead Add Reminder button (fixed)
+
+Second hands-on test (after the reopen-crash fix): dialog opened
+repeatedly now, but with no inner padding, a visually clipped input, and
+"Add Reminder" not responding to clicks at all. Two separate, unrelated
+bugs, both traced through Joplin's actual desktop source rather than
+guessed:
+
+**Add Reminder dead — confirmed root cause.** Read
+`packages/app-desktop/services/plugins/UserWebviewIndex.js`, the actual
+bootstrap script running inside the dialog's iframe. It receives our HTML
+and scripts via `postMessage` (`setHtml` sets `contentElement.innerHTML`;
+`setScripts` loops over paths and appends a real `<script src>` or
+`<link rel="stylesheet">` per extension) — both happen well *after* the
+iframe's own page has already finished loading. `dialog.ts` was gated
+behind `document.addEventListener('DOMContentLoaded', ...)`, but that
+event had already fired long before our dynamically-injected script even
+existed on the page. The listener registered successfully; it just could
+never fire. (Joplin's own bootstrap script avoids exactly this with a
+`docReady()` helper that checks `document.readyState` first — a real,
+confirmed instance of the same gotcha, handled correctly on their side and
+missed on ours.)
+
+**Fix:** removed the `DOMContentLoaded` wrapper from `dialog.ts` entirely —
+the setup code now runs immediately at script-load time, which is correct
+here since this script is always injected after the content already
+exists.
+
+**Clipping/no padding — root cause not fully provable from source alone**,
+so rather than keep guessing, used a documented, robust escape hatch
+instead of chasing an exact mechanism: `setFitToContent(handle, false)`.
+By default (`true`), Joplin measures the rendered content's bounding box
+and sizes the dialog tightly around it — fragile if that measurement
+happens before CSS has fully applied. Setting it to `false` gives a fixed
+90vw x 80vh canvas instead, sidestepping the measurement entirely. Paired
+with a `* { box-sizing: border-box; }` reset in `dialog.css`, which is a
+real, defensible fix regardless of the exact cause: without it, an input's
+padding and border add to its specified width instead of being contained
+within it — exactly the kind of thing that clips content in a tight flex
+row.
+
+**Tests:** extended `tests/reminderDialog.test.ts` to assert
+`setFitToContent` is called exactly once as part of the same one-time
+setup as `setButtons`.
+
+All 43 tests passing, `tsc --noEmit` clean, `.jpl` rebuilt and reverified.
+
 ## Deliverable
 
 `publish/com.advancedreminder.joplin.jpl` — install via Joplin's
 Options > Plugins > "Install from file". Verified working manifest
 (`app_min_version: 3.6`) confirmed inside the built archive. Dialog
-reopen-crash fix included in this build.
+reopen-crash fix, Add Reminder dead-click fix, and layout/sizing fix all
+included in this build.

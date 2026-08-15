@@ -16,6 +16,10 @@ const getDialogHandle = async (): Promise<string> => {
 		{ id: 'ok', title: 'Save' },
 		{ id: 'cancel', title: 'Cancel' },
 	]);
+	// Fit-to-content sizes the dialog by measuring rendered content, which
+	// raced with our CSS loading and produced a clipped, padding-less
+	// layout. A fixed 90vw/80vh canvas sidesteps that measurement entirely.
+	await joplin.views.dialogs.setFitToContent(dialogHandle, false);
 
 	return dialogHandle;
 };

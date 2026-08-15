@@ -4,6 +4,7 @@ const createMock = vi.fn(async () => 'handle-1');
 const setHtmlMock = vi.fn(async () => '');
 const addScriptMock = vi.fn(async () => {});
 const setButtonsMock = vi.fn(async () => []);
+const setFitToContentMock = vi.fn(async () => true);
 const openMock = vi.fn();
 const showMessageBoxMock = vi.fn(async () => 0);
 
@@ -19,6 +20,7 @@ vi.mock('api', () => ({
 				setHtml: setHtmlMock,
 				addScript: addScriptMock,
 				setButtons: setButtonsMock,
+				setFitToContent: setFitToContentMock,
 				open: openMock,
 				showMessageBox: showMessageBoxMock,
 			},
@@ -48,6 +50,7 @@ beforeEach(() => {
 	setHtmlMock.mockClear();
 	addScriptMock.mockClear();
 	setButtonsMock.mockClear();
+	setFitToContentMock.mockClear();
 	openMock.mockReset();
 	showMessageBoxMock.mockClear();
 	userDataStore.clear();
@@ -65,6 +68,7 @@ describe('reminderDialog', () => {
 		expect(createMock).toHaveBeenCalledTimes(1);
 		expect(setHtmlMock).toHaveBeenCalledTimes(2);
 		expect(setButtonsMock).toHaveBeenCalledTimes(1);
+		expect(setFitToContentMock).toHaveBeenCalledTimes(1);
 	});
 
 	it('should not save anything when the dialog is cancelled', async () => {

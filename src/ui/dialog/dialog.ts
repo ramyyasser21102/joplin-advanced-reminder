@@ -1,9 +1,12 @@
 import { nextReminderFieldName, buildReminderRow } from './reminderRow';
 
-document.addEventListener('DOMContentLoaded', () => {
-	const list = document.getElementById('reminder-list');
-	if (!list) return;
+// This script is injected via a dynamically-created <script> tag after the
+// dialog's HTML content has already been set, so document has always
+// already finished loading by the time this runs — DOMContentLoaded would
+// never fire again and this must run immediately, not wait for it.
+const list = document.getElementById('reminder-list');
 
+if (list) {
 	const addButton = document.getElementById('add-reminder');
 
 	addButton?.addEventListener('click', () => {
@@ -23,4 +26,4 @@ document.addEventListener('DOMContentLoaded', () => {
 			target.classList.toggle('empty', target.value === '');
 		}
 	}, true);
-});
+}
