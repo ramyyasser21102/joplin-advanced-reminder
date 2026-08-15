@@ -10,7 +10,7 @@ runner) is already complete.
 | 02 | [Reminder Persistence](02-reminder-persistence.md) | Done |
 | 03 | [Reminder Reconciliation](03-reminder-reconciliation.md) | Done |
 | 04 | [Date/Time Utilities](04-datetime-utilities.md) | Done |
-| 05 | [Reminder Dialog UI](05-reminder-dialog-ui.md) | Not started |
+| 05 | [Reminder Dialog UI](05-reminder-dialog-ui.md) | Done |
 | 06 | [Plugin Wiring](06-plugin-wiring.md) | Not started |
 | 07 | [Release Readiness](07-release-readiness.md) | Not started |
 
