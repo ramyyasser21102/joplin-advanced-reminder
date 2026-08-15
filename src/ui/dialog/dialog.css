@@ -1,3 +1,12 @@
+* {
+	box-sizing: border-box;
+}
+
+form {
+	padding: 12px;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
 .reminder-row {
 	display: flex;
 	align-items: center;
@@ -5,8 +14,28 @@
 	margin-bottom: 8px;
 }
 
+.reminder-row input[type="datetime-local"] {
+	padding: 4px 6px;
+	border: 1px solid #999999;
+	border-radius: 4px;
+	font-size: 13px;
+}
+
 .reminder-row input.empty {
 	border-color: #d32f2f;
+}
+
+button {
+	padding: 4px 12px;
+	border: 1px solid #999999;
+	border-radius: 4px;
+	background-color: #f0f0f0;
+	cursor: pointer;
+	font-size: 13px;
+}
+
+button:hover {
+	background-color: #e0e0e0;
 }
 
 #add-reminder {
@@ -16,6 +45,22 @@
 .theme-dark {
 	color: #dcdcdc;
 	background-color: #1e1e1e;
+}
+
+.theme-dark input[type="datetime-local"] {
+	background-color: #2a2a2a;
+	color: #dcdcdc;
+	border-color: #555555;
+}
+
+.theme-dark button {
+	background-color: #333333;
+	color: #dcdcdc;
+	border-color: #555555;
+}
+
+.theme-dark button:hover {
+	background-color: #444444;
 }
 
 .theme-light {

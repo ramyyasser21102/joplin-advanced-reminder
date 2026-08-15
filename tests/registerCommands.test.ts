@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const registerMock = vi.fn();
 const selectedNoteMock = vi.fn();
+const showToastMock = vi.fn(async () => {});
 
 vi.mock('api', () => ({
 	default: {
@@ -10,6 +11,11 @@ vi.mock('api', () => ({
 		},
 		workspace: {
 			selectedNote: selectedNoteMock,
+		},
+		views: {
+			dialogs: {
+				showToast: showToastMock,
+			},
 		},
 	},
 }));
@@ -25,6 +31,7 @@ beforeEach(() => {
 	registerMock.mockReset();
 	selectedNoteMock.mockReset();
 	openReminderDialogMock.mockReset();
+	showToastMock.mockClear();
 });
 
 describe('registerCommands', () => {
@@ -53,5 +60,17 @@ describe('registerCommands', () => {
 		await command.execute();
 
 		expect(openReminderDialogMock).not.toHaveBeenCalled();
+	});
+
+	it('should catch a dialog failure and show an error toast instead of failing silently', async () => {
+		await registerCommands();
+		const command = registerMock.mock.calls[0][0];
+		selectedNoteMock.mockResolvedValue({ id: 'note-1' });
+		openReminderDialogMock.mockRejectedValue(new Error('boom'));
+
+		await expect(command.execute()).resolves.toBeUndefined();
+
+		expect(showToastMock).toHaveBeenCalledTimes(1);
+		expect(showToastMock.mock.calls[0][0]).toMatchObject({ type: 'error' });
 	});
 });

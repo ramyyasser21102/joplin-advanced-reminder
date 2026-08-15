@@ -1,7 +1,7 @@
 {
 	"manifest_version": 1,
 	"id": "com.advancedreminder.joplin",
-	"app_min_version": "3.7",
+	"app_min_version": "3.6",
 	"version": "1.0.0",
 	"name": "Advanced Reminder",
 	"description": "Adds multiple reminder times to Joplin To-Do notes.",
@@ -11,6 +11,11 @@
 	"keywords": [],
 	"categories": [],
 	"screenshots": [],
-	"icons": {},
+	"icons": {
+		"16": "assets/icon-16.png",
+		"32": "assets/icon-32.png",
+		"48": "assets/icon-48.png",
+		"128": "assets/icon-128.png"
+	},
 	"promo_tile": {}
 }
