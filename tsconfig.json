@@ -8,7 +8,9 @@
     "skipLibCheck": true,
     "paths": {
       "@/*": ["./*"],
-      "api": ["./api"]
+      "api": ["./api"],
+      "api/*": ["./api/*"]
     }
-  }
+  },
+  "exclude": ["node_modules", "dist", "publish", "tests", "vitest.config.ts"]
 }
