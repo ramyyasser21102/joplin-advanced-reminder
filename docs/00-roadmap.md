@@ -7,7 +7,7 @@ runner) is already complete.
 | # | Feature | Status |
 |---|---------|--------|
 | 01 | [Reminder Scheduling Core](01-reminder-scheduling-core.md) | Done |
-| 02 | [Reminder Persistence](02-reminder-persistence.md) | In progress |
+| 02 | [Reminder Persistence](02-reminder-persistence.md) | Done |
 | 03 | [Reminder Reconciliation](03-reminder-reconciliation.md) | Not started |
 | 04 | [Date/Time Utilities](04-datetime-utilities.md) | Not started |
 | 05 | [Reminder Dialog UI](05-reminder-dialog-ui.md) | Not started |
