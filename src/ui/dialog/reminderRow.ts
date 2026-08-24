@@ -6,13 +6,14 @@ export const nextReminderFieldName = (list: HTMLElement): string => {
 	return `${REMINDER_FIELD_PREFIX}${nextId}`;
 };
 
-export const buildReminderRow = (fieldName: string): HTMLDivElement => {
+export const buildReminderRow = (fieldName: string, value = ''): HTMLDivElement => {
 	const row = document.createElement('div');
 	row.className = 'reminder-row';
 
 	const input = document.createElement('input');
 	input.type = 'datetime-local';
 	input.name = fieldName;
+	input.value = value;
 	row.appendChild(input);
 
 	const removeButton = document.createElement('button');

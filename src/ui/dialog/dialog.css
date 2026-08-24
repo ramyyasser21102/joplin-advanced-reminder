@@ -7,6 +7,17 @@ form {
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
+#quick-add-presets {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 12px;
+}
+
+#add-batch-reminders {
+	font-weight: bold;
+}
+
 .reminder-row {
 	display: flex;
 	align-items: center;

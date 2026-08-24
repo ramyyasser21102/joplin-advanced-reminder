@@ -27,4 +27,14 @@ describe('reminderFormHtml', () => {
 		expect(buildReminderFormHtml([], true)).toContain('theme-dark');
 		expect(buildReminderFormHtml([], false)).toContain('theme-light');
 	});
+
+	it('should render one quick-add preset button per preset plus a batch button', () => {
+		const html = buildReminderFormHtml([], false);
+
+		expect(html).toContain('id="quick-add-presets"');
+		expect(html).toContain('>5 min<');
+		expect(html).toContain('>1 week<');
+		expect((html.match(/class="quick-add-preset"/g) ?? []).length).toBe(6);
+		expect(html).toContain('id="add-batch-reminders"');
+	});
 });
