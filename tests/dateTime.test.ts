@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseLocalDateTime, formatLocalDateTime } from '../src/utils/dateTime';
+import { parseLocalDateTime, formatLocalDateTime, roundToMinute } from '../src/utils/dateTime';
 
 describe('dateTime', () => {
 	it('should parse a valid datetime-local string as local time, not UTC', () => {
@@ -25,5 +25,18 @@ describe('dateTime', () => {
 		const parsed = parseLocalDateTime(original);
 		expect(parsed).not.toBeNull();
 		expect(formatLocalDateTime(parsed as number)).toBe(original);
+	});
+
+	it('should truncate seconds and milliseconds so two timestamps in the same minute round to the same value', () => {
+		const early = new Date(2026, 0, 1, 9, 0, 5, 100).getTime();
+		const late = new Date(2026, 0, 1, 9, 0, 55, 900).getTime();
+		expect(roundToMinute(early)).toBe(roundToMinute(late));
+		expect(roundToMinute(early)).toBe(new Date(2026, 0, 1, 9, 0, 0, 0).getTime());
+	});
+
+	it('should not round two timestamps in different minutes to the same value', () => {
+		const nineOhZero = new Date(2026, 0, 1, 9, 0, 30).getTime();
+		const nineOhOne = new Date(2026, 0, 1, 9, 1, 0).getTime();
+		expect(roundToMinute(nineOhZero)).not.toBe(roundToMinute(nineOhOne));
 	});
 });

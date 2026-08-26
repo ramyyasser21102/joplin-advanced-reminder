@@ -16,3 +16,14 @@ export const formatLocalDateTime = (timestamp: number): string => {
 
 	return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
+
+// datetime-local inputs (and everything stored/compared as a Reminder.at)
+// only carry minute resolution. Computed candidates like Date.now() +
+// offsetMs still carry seconds/ms, so comparing them against listed values
+// without this round-trip almost never matches — the seconds/ms component
+// makes an otherwise-identical minute look unique.
+export const roundToMinute = (timestamp: number): number => {
+	const formatted = formatLocalDateTime(timestamp);
+	const parsed = parseLocalDateTime(formatted);
+	return parsed === null ? timestamp : parsed;
+};
