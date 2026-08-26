@@ -14,19 +14,55 @@ keeps Joplin's single native alarm in sync with the earliest one still in
 the future — so a note can have as many reminders as it needs, and Joplin
 still fires an alarm at the right moment every time.
 
+<p align="center">
+  <img src="src/assets/screenshot_1.webp" alt="The Manage reminders dialog, showing Quick add presets, a Custom batch builder, Saved presets, and the note's Reminders list" width="900" />
+</p>
+
 ## Features
 
-- Multiple reminder times per To-Do note, managed from a single dialog
-- A toolbar button / command ("Manage reminders"), enabled only on To-Do notes
+**Creating reminders** — four ways to build a note's reminder list, all in
+one dialog:
+
+- **Reminders** — the note's actual list; add a blank row and pick a date/time,
+  or edit/remove any row directly.
+- **Quick add** — one-click preset offsets (5 min, 10 min, 30 min, 1 hour,
+  1 day, 1 week), individually or all at once.
+- **Custom batch** — describe a reminder in plain terms (years / months /
+  days / hours / minutes / seconds from now), stage as many as you like,
+  then accept or cancel the whole batch together. Name a batch (with an
+  optional description) to save it as a reusable preset.
+- **Saved presets** — apply a single time or an entire saved preset with
+  one click; remove presets you no longer want.
+
+**Keeping the list clean and correct:**
+
+- **Reset** clears in-progress, unsaved rows in the open dialog; **Clear
+  all** deletes every reminder already saved to the note — two distinct,
+  clearly-labeled actions so neither is a surprise for the other.
+- Duplicate prevention on every creation path (single entry, quick-add,
+  batch, saved-preset) — checked immediately as you add something, and
+  enforced again at Save so nothing can slip through.
+- Rejects reminders already in the past, zero/negative/overflowing custom
+  durations, and non-numeric input in the duration fields, with a clear
+  in-dialog message for each.
+- Preset names and descriptions are validated and HTML-escaped before
+  they're ever rendered back into the dialog.
+
+**Staying in sync with Joplin:**
+
+- A toolbar button / command ("Manage reminders"), enabled only on To-Do
+  notes.
 - Automatically imports a note's existing native reminder (`todo_due`) into
   the list the first time you open the dialog on it, so nothing already set
-  gets lost
+  gets lost — and never re-imports it once the note is managed by this
+  plugin, so a reminder you've cleared stays cleared.
 - Keeps Joplin's native alarm (`todo_due`) in sync with the earliest
-  upcoming reminder — updates it only when it actually needs to change
+  upcoming reminder — updates it only when it actually needs to change.
 - When a reminder fires, automatically promotes the next one in the list,
   including catching up on startup if Joplin was closed when the promotion
-  should have happened
-- Dialog respects Joplin's light/dark theme
+  should have happened.
+- Dialog respects Joplin's light/dark theme, including its own in-dialog
+  notice banner for warnings and confirmations.
 
 ## Requirements
 
@@ -34,8 +70,10 @@ Joplin desktop 3.6 or later.
 
 ## Installation
 
-**From Joplin (once published):** Configuration > Plugins, search for
-"Advanced Reminder", install.
+**From Joplin:** Configuration > Plugins, search for "Advanced Reminder",
+install. Note: the version in Joplin's plugin catalog is only refreshed
+when a new version is published to npm — see
+[Development](#development) if you want the latest features before then.
 
 **Manual install:** download or build `com.advancedreminder.joplin.jpl`
 (see [Development](#development) below), then in Joplin go to
@@ -47,8 +85,15 @@ select the `.jpl`. Restart Joplin when prompted.
 1. Open or create a To-Do note.
 2. Click the "Manage reminders" toolbar button (or run the command from the
    command palette) — it's only enabled on To-Do notes.
-3. Add, edit, or remove reminder times, then Save.
-4. Joplin will alert you at the earliest upcoming time; when it fires, the
+3. Build the note's reminder list any combination of ways: add rows
+   directly under **Reminders**, click a preset under **Quick add**, stage
+   and accept a **Custom batch**, or apply a **Saved preset** — then click
+   **Save**.
+4. Use **Reset** to discard in-progress rows before saving, or **Clear
+   all** to delete everything already saved to the note. Build a reusable
+   preset from a Custom batch with **Save as preset**, or remove one you no
+   longer want.
+5. Joplin will alert you at the earliest upcoming time; when it fires, the
    next reminder in the list automatically takes over.
 
 ## Development
@@ -99,4 +144,12 @@ mode.
 
 ## Project Status
 
-Feature-complete for its initial scope (see [docs/00-roadmap.md](./docs/00-roadmap.md)); verified on Joplin desktop 3.6.15.
+Actively developed past its initial scope — batching, saved presets,
+duplicate prevention, and input validation have all landed since the first
+release (see [docs/00-roadmap.md](./docs/00-roadmap.md) for the full
+feature-by-feature history). Verified on Joplin desktop 3.6.15.
+
+The npm package has been published once (`joplin-plugin-advanced-reminder`,
+picked up by Joplin's plugin repository), but at an earlier version — the
+catalog listing won't reflect the current feature set or manifest
+`keywords`/`categories` until a newer version is published.
