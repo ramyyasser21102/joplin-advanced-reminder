@@ -65,63 +65,81 @@ beforeEach(() => {
 	batchPresetsSetting = [];
 });
 
-describe('reminderDialog', () => {
-	it('should create the dialog handle only once across multiple opens (regression: create() throws on a reused handle)', async () => {
+describe('reminderDialog save-as-preset', () => {
+	it('should save a named batch preset from staged custom-batch timestamps, without saving reminders to the note', async () => {
 		const { openReminderDialog } = await import('../src/ui/reminderDialog');
-		openMock.mockResolvedValue({ id: 'cancel' });
 
-		await openReminderDialog(noteId);
-		await openReminderDialog(noteId);
-
-		expect(createMock).toHaveBeenCalledTimes(1);
-		expect(setHtmlMock).toHaveBeenCalledTimes(2);
-		expect(setButtonsMock).toHaveBeenCalledTimes(1);
-		expect(setFitToContentMock).toHaveBeenCalledTimes(1);
-	});
-
-	it('should not save anything when the dialog is cancelled', async () => {
-		const { openReminderDialog } = await import('../src/ui/reminderDialog');
-		openMock.mockResolvedValue({ id: 'cancel' });
+		openMock
+			.mockResolvedValueOnce({
+				id: 'save-preset',
+				formData: { reminders: { 'reminder-0': '2099-01-01T09:00', batchStagedTimestamps: '[{"at":4102444800000,"label":"After 1 year"}]' } },
+			})
+			.mockResolvedValueOnce({ id: 'ok', formData: { presetName: { name: 'Bedtime prep' } } });
 
 		await openReminderDialog(noteId);
 
 		expect(userDataStore.size).toBe(0);
+		expect(batchPresetsSetting).toHaveLength(1);
+		const saved = batchPresetsSetting[0] as { name: string; entries: { offsetMs: number; label: string }[] };
+		expect(saved.name).toBe('Bedtime prep');
+		expect(saved.entries[0].label).toBe('After 1 year');
 	});
 
-	it('should save reminders and reconcile todo_due when the dialog is saved', async () => {
+	it('should save a preset using the inline custom-batch name and description fields, without opening the naming dialog', async () => {
 		const { openReminderDialog } = await import('../src/ui/reminderDialog');
-		openMock.mockResolvedValue({
-			id: 'ok',
-			formData: { reminders: { 'reminder-0': '2099-01-01T09:00' } },
-		});
 
-		await openReminderDialog(noteId);
-
-		const saved = userDataStore.get(`${noteId}:advancedReminder.reminders.v1`) as {
-			reminders: { id: string; at: number }[];
-		};
-		expect(saved.reminders).toHaveLength(1);
-		expect(noteTodoDue.get(noteId)).toBe(saved.reminders[0].at);
-	});
-
-	it('should skip duplicate rows and warn about them via showMessageBox', async () => {
-		const { openReminderDialog } = await import('../src/ui/reminderDialog');
-		openMock.mockResolvedValue({
-			id: 'ok',
+		openMock.mockResolvedValueOnce({
+			id: 'save-preset',
 			formData: {
 				reminders: {
-					'reminder-0': '2099-01-01T09:00',
-					'reminder-1': '2099-01-01T09:00',
+					batchStagedTimestamps: '[{"at":4102444800000,"label":"After 1 year"}]',
+					batchPresetName: 'Bedtime prep',
+					batchPresetDescription: 'Wind-down reminders',
 				},
 			},
 		});
 
 		await openReminderDialog(noteId);
 
-		const saved = userDataStore.get(`${noteId}:advancedReminder.reminders.v1`) as {
-			reminders: { id: string; at: number }[];
-		};
-		expect(saved.reminders).toHaveLength(1);
-		expect(showMessageBoxMock).toHaveBeenCalledWith(expect.stringContaining('1 duplicate reminder already in the list'));
+		expect(openMock).toHaveBeenCalledTimes(1);
+		expect(batchPresetsSetting).toHaveLength(1);
+		const saved = batchPresetsSetting[0] as { name: string; description: string };
+		expect(saved.name).toBe('Bedtime prep');
+		expect(saved.description).toBe('Wind-down reminders');
+	});
+
+	it('should reject an invalid inline preset name and not save it', async () => {
+		const { openReminderDialog } = await import('../src/ui/reminderDialog');
+
+		openMock.mockResolvedValueOnce({
+			id: 'save-preset',
+			formData: {
+				reminders: {
+					batchStagedTimestamps: '[{"at":4102444800000,"label":"After 1 year"}]',
+					batchPresetName: '<script>bad</script>',
+				},
+			},
+		});
+
+		await openReminderDialog(noteId);
+
+		expect(openMock).toHaveBeenCalledTimes(1);
+		expect(batchPresetsSetting).toHaveLength(0);
+		expect(showMessageBoxMock).toHaveBeenCalledWith(expect.stringContaining("preset name isn't valid"));
+	});
+
+	it('should ignore the main Reminders list when saving a preset, and require a staged custom batch instead', async () => {
+		const { openReminderDialog } = await import('../src/ui/reminderDialog');
+
+		openMock.mockResolvedValueOnce({
+			id: 'save-preset',
+			formData: { reminders: { 'reminder-0': '2099-01-01T09:00' } },
+		});
+
+		await openReminderDialog(noteId);
+
+		expect(openMock).toHaveBeenCalledTimes(1);
+		expect(batchPresetsSetting).toHaveLength(0);
+		expect(showMessageBoxMock).toHaveBeenCalledWith(expect.stringContaining('Custom batch'));
 	});
 });

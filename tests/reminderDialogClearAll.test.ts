@@ -65,63 +65,46 @@ beforeEach(() => {
 	batchPresetsSetting = [];
 });
 
-describe('reminderDialog', () => {
-	it('should create the dialog handle only once across multiple opens (regression: create() throws on a reused handle)', async () => {
+describe('reminderDialog clear-all', () => {
+	it('should delete every saved reminder and reconcile todo_due to 0 when Clear all is confirmed', async () => {
 		const { openReminderDialog } = await import('../src/ui/reminderDialog');
-		openMock.mockResolvedValue({ id: 'cancel' });
+		const { saveReminders } = await import('../src/reminder/reminderStore');
+		await saveReminders(noteId, [{ id: 'a', at: 5000 }]);
+		noteTodoDue.set(noteId, 5000);
+		showMessageBoxMock.mockResolvedValueOnce(0);
+
+		openMock.mockResolvedValueOnce({ id: 'clear-all' });
 
 		await openReminderDialog(noteId);
-		await openReminderDialog(noteId);
 
-		expect(createMock).toHaveBeenCalledTimes(1);
-		expect(setHtmlMock).toHaveBeenCalledTimes(2);
-		expect(setButtonsMock).toHaveBeenCalledTimes(1);
-		expect(setFitToContentMock).toHaveBeenCalledTimes(1);
+		const saved = userDataStore.get(`${noteId}:advancedReminder.reminders.v1`) as { reminders: unknown[] };
+		expect(saved.reminders).toEqual([]);
+		expect(noteTodoDue.get(noteId)).toBe(0);
 	});
 
-	it('should not save anything when the dialog is cancelled', async () => {
+	it('should leave saved reminders untouched when Clear all is not confirmed', async () => {
 		const { openReminderDialog } = await import('../src/ui/reminderDialog');
-		openMock.mockResolvedValue({ id: 'cancel' });
+		const { saveReminders } = await import('../src/reminder/reminderStore');
+		await saveReminders(noteId, [{ id: 'a', at: 5000 }]);
+		noteTodoDue.set(noteId, 5000);
+		showMessageBoxMock.mockResolvedValueOnce(1);
+
+		openMock.mockResolvedValueOnce({ id: 'clear-all' });
 
 		await openReminderDialog(noteId);
 
-		expect(userDataStore.size).toBe(0);
-	});
-
-	it('should save reminders and reconcile todo_due when the dialog is saved', async () => {
-		const { openReminderDialog } = await import('../src/ui/reminderDialog');
-		openMock.mockResolvedValue({
-			id: 'ok',
-			formData: { reminders: { 'reminder-0': '2099-01-01T09:00' } },
-		});
-
-		await openReminderDialog(noteId);
-
-		const saved = userDataStore.get(`${noteId}:advancedReminder.reminders.v1`) as {
-			reminders: { id: string; at: number }[];
-		};
+		const saved = userDataStore.get(`${noteId}:advancedReminder.reminders.v1`) as { reminders: unknown[] };
 		expect(saved.reminders).toHaveLength(1);
-		expect(noteTodoDue.get(noteId)).toBe(saved.reminders[0].at);
+		expect(noteTodoDue.get(noteId)).toBe(5000);
 	});
 
-	it('should skip duplicate rows and warn about them via showMessageBox', async () => {
+	it('should show an informational message and skip the confirm when there is nothing to clear', async () => {
 		const { openReminderDialog } = await import('../src/ui/reminderDialog');
-		openMock.mockResolvedValue({
-			id: 'ok',
-			formData: {
-				reminders: {
-					'reminder-0': '2099-01-01T09:00',
-					'reminder-1': '2099-01-01T09:00',
-				},
-			},
-		});
+		openMock.mockResolvedValueOnce({ id: 'clear-all' });
 
 		await openReminderDialog(noteId);
 
-		const saved = userDataStore.get(`${noteId}:advancedReminder.reminders.v1`) as {
-			reminders: { id: string; at: number }[];
-		};
-		expect(saved.reminders).toHaveLength(1);
-		expect(showMessageBoxMock).toHaveBeenCalledWith(expect.stringContaining('1 duplicate reminder already in the list'));
+		expect(showMessageBoxMock).toHaveBeenCalledWith(expect.stringContaining('no saved reminders'));
+		expect(showMessageBoxMock).toHaveBeenCalledTimes(1);
 	});
 });
