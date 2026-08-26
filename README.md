@@ -15,7 +15,7 @@ the future — so a note can have as many reminders as it needs, and Joplin
 still fires an alarm at the right moment every time.
 
 <p align="center">
-  <img src="src/assets/screenshot_1.webp" alt="The Manage reminders dialog, showing Quick add presets, a Custom batch builder, Saved presets, and the note's Reminders list" width="900" />
+  <img src="https://raw.githubusercontent.com/ramyyasser21102/joplin-advanced-reminder/main/src/assets/screenshot_1.webp" alt="The Manage reminders dialog, showing Quick add presets, a Custom batch builder, Saved presets, and the note's Reminders list" width="900" />
 </p>
 
 ## Features
