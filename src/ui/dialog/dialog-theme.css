@@ -1,0 +1,68 @@
+.theme-dark {
+	color: #dcdcdc;
+	background-color: #1e1e1e;
+}
+
+.theme-dark .dialog-group {
+	border-color: #444444;
+	background-color: rgba(255, 255, 255, 0.03);
+}
+
+.theme-dark .group-heading {
+	color: #aaaaaa;
+}
+
+.theme-dark .group-description {
+	color: #999999;
+}
+
+.theme-dark .staged-item {
+	border-color: #555555;
+}
+
+.theme-dark .saved-preset {
+	border-color: #444444;
+}
+
+.theme-dark .saved-preset-description,
+.theme-dark .saved-presets-empty {
+	color: #999999;
+}
+
+.theme-dark input[type="text"],
+.theme-dark input[type="datetime-local"],
+.theme-dark input[type="number"],
+.theme-dark select {
+	background-color: #2a2a2a;
+	color: #dcdcdc;
+	border-color: #555555;
+}
+
+.theme-dark .duration-field {
+	color: #999999;
+}
+
+/* :not(.btn) keeps this from outranking the .btn-* variant rules in
+   dialog.css — a class+element selector beats a single class selector
+   regardless of source order, which would otherwise flatten every button
+   to this grey in dark mode. Only variant-less buttons (Remove/Save
+   preset) get it. */
+.theme-dark button:not(.btn) {
+	background-color: #333333;
+	color: #dcdcdc;
+	border-color: #555555;
+}
+
+.theme-dark button:not(.btn):hover {
+	background-color: #444444;
+}
+
+.theme-dark .btn-outline:hover,
+.theme-dark .btn-ghost:hover {
+	background-color: rgba(255, 255, 255, 0.08);
+}
+
+.theme-light {
+	color: #222222;
+	background-color: #ffffff;
+}

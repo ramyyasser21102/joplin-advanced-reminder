@@ -59,69 +59,53 @@ beforeEach(() => {
 	setButtonsMock.mockClear();
 	setFitToContentMock.mockClear();
 	openMock.mockReset();
-	showMessageBoxMock.mockClear();
+	showMessageBoxMock.mockReset();
+	showMessageBoxMock.mockResolvedValue(0);
 	userDataStore.clear();
 	noteTodoDue.clear();
-	batchPresetsSetting = [];
+	batchPresetsSetting = [{ id: 'preset-1', name: 'First', description: '', entries: [{ offsetMs: 60000, label: 'After 1 minute' }] }];
 });
 
-describe('reminderDialog', () => {
-	it('should create the dialog handle only once across multiple opens (regression: create() throws on a reused handle)', async () => {
+describe('reminderDialog delete-presets', () => {
+	it('should delete only the selected presets when confirmed', async () => {
+		batchPresetsSetting.push({ id: 'preset-2', name: 'Second', description: '', entries: [{ offsetMs: 120000, label: 'After 2 minutes' }] });
 		const { openReminderDialog } = await import('../src/ui/reminderDialog');
-		openMock.mockResolvedValue({ id: 'cancel' });
 
-		await openReminderDialog(noteId);
-		await openReminderDialog(noteId);
-
-		expect(createMock).toHaveBeenCalledTimes(1);
-		expect(setHtmlMock).toHaveBeenCalledTimes(2);
-		expect(setButtonsMock).toHaveBeenCalledTimes(1);
-		expect(setFitToContentMock).toHaveBeenCalledTimes(1);
-	});
-
-	it('should not save anything when the dialog is cancelled', async () => {
-		const { openReminderDialog } = await import('../src/ui/reminderDialog');
-		openMock.mockResolvedValue({ id: 'cancel' });
-
-		await openReminderDialog(noteId);
-
-		expect(userDataStore.size).toBe(0);
-	});
-
-	it('should save reminders and reconcile todo_due when the dialog is saved', async () => {
-		const { openReminderDialog } = await import('../src/ui/reminderDialog');
-		openMock.mockResolvedValue({
-			id: 'ok',
-			formData: { reminders: { 'reminder-0': '2099-01-01T09:00' } },
+		openMock.mockResolvedValueOnce({
+			id: 'delete-presets',
+			formData: { reminders: { deletePresetIds: '["preset-1"]' } },
 		});
 
 		await openReminderDialog(noteId);
 
-		const saved = userDataStore.get(`${noteId}:advancedReminder.reminders.v1`) as {
-			reminders: { id: string; at: number }[];
-		};
-		expect(saved.reminders).toHaveLength(1);
-		expect(noteTodoDue.get(noteId)).toBe(saved.reminders[0].at);
+		expect(batchPresetsSetting.map((preset) => (preset as { id: string }).id)).toEqual(['preset-2']);
 	});
 
-	it('should skip duplicate rows and warn about them via showMessageBox', async () => {
+	it('should leave presets untouched when deletion is not confirmed', async () => {
+		showMessageBoxMock.mockResolvedValueOnce(1);
 		const { openReminderDialog } = await import('../src/ui/reminderDialog');
-		openMock.mockResolvedValue({
-			id: 'ok',
-			formData: {
-				reminders: {
-					'reminder-0': '2099-01-01T09:00',
-					'reminder-1': '2099-01-01T09:00',
-				},
-			},
+
+		openMock.mockResolvedValueOnce({
+			id: 'delete-presets',
+			formData: { reminders: { deletePresetIds: '["preset-1"]' } },
 		});
 
 		await openReminderDialog(noteId);
 
-		const saved = userDataStore.get(`${noteId}:advancedReminder.reminders.v1`) as {
-			reminders: { id: string; at: number }[];
-		};
-		expect(saved.reminders).toHaveLength(1);
-		expect(showMessageBoxMock).toHaveBeenCalledWith(expect.stringContaining('1 duplicate reminder already in the list'));
+		expect(batchPresetsSetting).toHaveLength(1);
+	});
+
+	it('should warn instead of deleting when nothing is marked for deletion', async () => {
+		const { openReminderDialog } = await import('../src/ui/reminderDialog');
+
+		openMock.mockResolvedValueOnce({
+			id: 'delete-presets',
+			formData: { reminders: { deletePresetIds: '[]' } },
+		});
+
+		await openReminderDialog(noteId);
+
+		expect(batchPresetsSetting).toHaveLength(1);
+		expect(showMessageBoxMock).toHaveBeenCalledWith(expect.stringContaining('Nothing is marked for deletion'));
 	});
 });

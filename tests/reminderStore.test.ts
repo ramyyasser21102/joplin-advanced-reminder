@@ -45,25 +45,30 @@ describe('reminderStore', () => {
 		expect(await loadReminders(noteId)).toEqual([]);
 	});
 
-	it('should leave reminders unchanged when the note has no todo_due set', async () => {
+	it('should return an empty list for a never-used note with no todo_due set', async () => {
 		nextTodoDue = 0;
-		await saveReminders(noteId, [{ id: 'a', at: 1000 }]);
 		const result = await importTodoDueReminder(noteId);
-		expect(result).toEqual([{ id: 'a', at: 1000 }]);
+		expect(result).toEqual([]);
 	});
 
-	it('should import todo_due as a new reminder when it is not already present', async () => {
+	it('should import todo_due as a new reminder for a never-used note, and persist it', async () => {
 		nextTodoDue = 5000;
-		await saveReminders(noteId, [{ id: 'a', at: 1000 }]);
 		const result = await importTodoDueReminder(noteId);
-		expect(result).toEqual([{ id: 'a', at: 1000 }, { id: 'imported-5000', at: 5000 }]);
+		expect(result).toEqual([{ id: 'imported-5000', at: 5000 }]);
 		expect(await loadReminders(noteId)).toEqual(result);
 	});
 
-	it('should not duplicate todo_due when it matches an existing reminder time', async () => {
-		nextTodoDue = 1000;
+	it('should never re-import todo_due once the note has any saved data, even if todo_due differs', async () => {
+		nextTodoDue = 5000;
 		await saveReminders(noteId, [{ id: 'a', at: 1000 }]);
 		const result = await importTodoDueReminder(noteId);
 		expect(result).toEqual([{ id: 'a', at: 1000 }]);
+	});
+
+	it('should not resurrect a cleared list (regression: Reset must stick even if todo_due is later non-zero)', async () => {
+		await saveReminders(noteId, []);
+		nextTodoDue = 5000;
+		const result = await importTodoDueReminder(noteId);
+		expect(result).toEqual([]);
 	});
 });
